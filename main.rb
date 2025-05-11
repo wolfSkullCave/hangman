@@ -1,8 +1,9 @@
 class Hangman
-  attr_accessor :word, :filename
+  attr_reader :word, :filename, :wordslist, :attempts_Left, :hidden_word
+  attr_writer :guess
 
   def initialize(filename)
-    @word = []
+    @wordslist = []
     @filename = filename
   end
 
@@ -11,7 +12,7 @@ class Hangman
     while line = f.gets
       if line.length > 5 and line.length < 12
         # puts line
-        @word << line
+        @wordslist << line
       end
     end
     f.close
@@ -19,9 +20,15 @@ class Hangman
   end
 
   def shuffle_word
-    @word.shuffle.first
+    @word = @wordslist.shuffle.first
+  end
+
+  def hidden_word
+    @word.each_char { |char| print '_ ' }
   end
 end
 
 play = Hangman.new('words.txt')
-puts play.read_file
+play.read_file
+puts play.word
+play.hidden_word
