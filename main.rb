@@ -2,13 +2,14 @@ require 'pry-byebug'
 
 class Hangman
   attr_reader :word, :filename, :wordslist, :attempts, :hidden_word
-  attr_writer :guess
+  attr_writer :guess, :previous_guesses
 
   def initialize(filename)
     @wordslist = []
     @hidden_word = []
     @filename = filename
     @attempts = 0
+    @guess = []
 
     read_file
     shuffle_word
@@ -42,6 +43,7 @@ class Hangman
       end # Closing the if block
     end # Closing the each_with_index block
     @attempts += 1
+    @guess << letter
   end
 
   def test_word
@@ -53,7 +55,6 @@ class Hangman
   end
 
   def start_game(letter)
-    hidden_word
     puts @hidden_word.join
     puts "#{@hidden_word.length} Characters"
     # byebug
@@ -64,6 +65,24 @@ class Hangman
       puts "Attemps: #{@attempts}/#{@word.length}"
       win_conditions
     end
+  end
+
+  def play_game
+    # byebug
+    while @attempts <= @hidden_word.length
+      guess
+      guess_word(@guess.last)
+      puts "word: #{@hidden_word.join}"
+      puts "#{@hidden_word.length} Characters"
+
+      puts "Attemps: #{@attempts}/#{@word.length}"
+      win_conditions    
+    end
+  end
+
+  def guess
+    puts "Enter letter: "
+    @guess << gets.chomp
   end
 
   def win_conditions
@@ -81,6 +100,7 @@ guesses2 = %w[c a n r d]
 
 play = Hangman.new('words.txt')
 play.test_word
-# play.word
+play.word
 # play.start_game(guesses)
-play.start_game(guesses2)
+# play.start_game(guesses2)
+play.play_game
