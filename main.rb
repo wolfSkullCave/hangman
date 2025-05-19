@@ -79,7 +79,7 @@ class Hangman
 
   def guess
     puts 'Enter letter: '
-    @guess << gets.chomp
+    @guess << gets.chomp.downcase
     return @guess.last
   end
 
