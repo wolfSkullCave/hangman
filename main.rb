@@ -46,61 +46,56 @@ class Hangman
     @guess << letter
   end
 
-  def test_word
-    @word = 'canard'.chars
-  end
-
   def word
     puts @word.join
   end
 
-  def start_game(letter)
-    puts @hidden_word.join
-    puts "#{@hidden_word.length} Characters"
-    # byebug
-    letter.each do |item|
-      guess_word(item)
-      puts @hidden_word.join
+  def test_game
+    @word = 'canard'.chars
+    guesses = %w[a e o u r d]
 
-      puts "Attemps: #{@attempts}/#{@word.length}"
-      win_conditions
+    hidden_word
+    guesses.each do |letter|
+      puts "word: #{@hidden_word.join}"
+      puts "guessed letters: #{@guess.join}"
+      puts "attempts: #{@attempts}"
+
+      guess_word(letter)
+      break if game_over
     end
   end
 
-  def play_game
-    # byebug
-    while @attempts <= @hidden_word.length
-      guess
-      guess_word(@guess.last)
+  def start_game
+    hidden_word
+    until game_over
       puts "word: #{@hidden_word.join}"
-      puts "#{@hidden_word.length} Characters"
+      puts "guessed letters: #{@guess.uniq}"
+      puts "attempts: #{@attempts}/#{@word.length}"
 
-      puts "Attemps: #{@attempts}/#{@word.length}"
-      win_conditions    
+      guess_word(guess)
+      game_over
     end
   end
 
   def guess
-    puts "Enter letter: "
+    puts 'Enter letter: '
     @guess << gets.chomp
+    return @guess.last
   end
 
-  def win_conditions
-     if @hidden_word.eql?(@word)
-      puts "Winner!"
-     elsif @attempts == @hidden_word.length
-      puts "game over"
-      puts "Word: #{@word.join}"
-     end
+  def game_over
+    if @hidden_word.eql?(@word)
+      puts 'You win!'
+      true
+    elsif @hidden_word.length == @attempts
+      puts 'You lose...'
+      puts "Answer: #{@word.join}"
+      true
+    end
   end
+
 end
 
-guesses = %w[a e o u r d]
-guesses2 = %w[c a n r d]
-
 play = Hangman.new('words.txt')
-play.test_word
-play.word
-# play.start_game(guesses)
-# play.start_game(guesses2)
-play.play_game
+# play.test_game
+play.start_game
