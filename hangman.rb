@@ -1,5 +1,6 @@
 require 'json'
 require 'pry-byebug'
+require 'colorize'
 
 class Hangman
   attr_reader :word, :hidden_word, :attempts, :filename, :guess, :wordslist
@@ -61,11 +62,11 @@ class Hangman
   end
 
   def display_status
-    puts "word: #{@hidden_word.join(' ')}"
-    puts "guessed letters: #{@guess.uniq.join(' ')}"
-    puts "attempts left: #{@attempts}"
-    puts 'Save game with: /save'
-    puts 'Load game with /load'
+    puts "word: #{@hidden_word.join(' ')}".colorize(:yellow)
+    puts "guessed letters: #{@guess.uniq.join(' ')}".colorize(:red)
+    puts "attempts left: #{@attempts}".colorize(:green)
+    puts 'Save game with: /save'.colorize(:grey)
+    puts 'Load game with /load'.colorize(:grey)
   end
 
   def get_guess
@@ -91,11 +92,11 @@ class Hangman
 
   def game_over?
     if @attempts == 0
-      puts 'Game Over'
+      puts 'Game Over'.yellow
       puts "Word: #{@word.join}"
       true
     elsif @word == @hidden_word
-      puts 'You Win'
+      puts 'You Win'.yellow
       true
     end
   end
@@ -112,7 +113,7 @@ class Hangman
       file.write(JSON.pretty_generate(game_data))
     end
 
-    puts 'Game saved to game_save'
+    puts 'Game saved to game_save'.colorize(:grey)
   end
 
   def load_game(filename = 'game_save.json')
@@ -123,9 +124,9 @@ class Hangman
       @attempts = data[:attemps]
       @guess = data[:guesses]
 
-      puts 'Game loaded.'
+      puts 'Game loaded.'.colorize(:grey)
     else
-      puts 'No saved game found.'
+      puts 'No saved game found.'.yellow.on_red
     end
   end
 end
