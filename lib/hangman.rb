@@ -3,7 +3,7 @@ require 'pry-byebug'
 require 'colorize'
 
 class Hangman
-  attr_reader :word, :hidden_word, :attempts, :filename, :guess, :wordslist
+  attr_reader :word, :hidden_word, :attempts, :filename, :guess, :wordslist, :save_path
 
   def initialize(filename)
     # declare variables
@@ -13,6 +13,7 @@ class Hangman
     @hidden_word = []
     @guess = []
     @attempts = 12
+    @save_path = File.join(File.dirname(__FILE__), '../save_files/game_save.json')
 
     # initialize variables
     read_file
@@ -32,18 +33,31 @@ class Hangman
         break
       when '/load'
         load_game
+        next
       end
 
-      check_word_for(letter)
-      game_over?
+      process_guess(letter)
     end
+  end
+
+  def process_guess(letter)
+    return if letter.empty? || @guess.include?(letter)
+    if @word.include?(letter)
+      @word.each_with_index do |item, index|
+        @hidden_word[index] = letter if item == letter
+      end
+    else
+      @attempts -= 1
+    end
+    @guess << letter
   end
 
   private
 
   def read_file
-    # Reads a list of words from a file and adds them to a wordlist array.
-    f = File.open(@filename)
+    # Reads a list of words from the correct file location
+    words_path = File.join(File.dirname(__FILE__), 'words.txt')
+    f = File.open(words_path)
     while line = f.gets
       line = line.strip # Remove newline and whitespace
       @wordslist << line if line.length > 5 and line.length < 12
@@ -74,22 +88,6 @@ class Hangman
     gets.chomp.downcase
   end
 
-  def check_word_for(letter)
-    if @word.include?(letter)
-      @word.each_with_index do |item, index|
-        @hidden_word[index] = letter if item == letter.strip
-      end
-    elsif letter == '/load'
-      if @guess.include?('/load')
-        @guess.delete('/load')
-      end
-    else
-      @attempts -= 1
-      @guess << letter
-    end
-
-  end
-
   def game_over?
     if @attempts == 0
       puts 'Game Over'.yellow
@@ -101,7 +99,8 @@ class Hangman
     end
   end
 
-  def save_game(filename = 'game_save.json')
+  def save_game(filename = nil)
+    filename ||= @save_path
     game_data = {
       word: @word,
       hidden_word: @hidden_word,
@@ -113,10 +112,11 @@ class Hangman
       file.write(JSON.pretty_generate(game_data))
     end
 
-    puts 'Game saved to game_save'.colorize(:grey)
+    puts "Game saved to #{filename}".colorize(:grey)
   end
 
-  def load_game(filename = 'game_save.json')
+  def load_game(filename = nil)
+    filename ||= @save_path
     if File.exist?(filename)
       data = JSON.parse(File.read(filename), symbolize_names: true)
       @word = data[:word]
@@ -125,6 +125,9 @@ class Hangman
       @guess = data[:guesses]
 
       puts 'Game loaded.'.colorize(:grey)
+
+      # delete save file after load
+      File.delete(filename) if File.exist?(filename)
     else
       puts 'No saved game found.'.yellow.on_red
     end

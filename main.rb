@@ -1,6 +1,4 @@
-require 'pry-byebug'
-require 'json'
-require_relative 'hangman'
+require_relative 'lib/hangman'
 
 play = Hangman.new('words.txt')
 play.start_game
